@@ -3,6 +3,8 @@
 ## Dataset과 Dataloader 작성
 
 ### 학습 및 검증용 이미지 데이터, 어노테이션 데이터 파일 경로 리스트 작성
+Make_datapath_list
+
 Example:
 VOCdevkit/VOC2012/
 │
@@ -34,6 +36,8 @@ train_dataset = VOCDataset(train_img_list, train_anno_list, phase="train", trans
 
 #### transform_anno는 객체 위치와 라벨 정보에 대한 전처리 과정 => [[xmin,ymin,xmax,ymax,label_index], ... ]
 ##### XML 포맷의 annotation을 List로 변환
+Anno_xml2list
+
 Example:
 
 <annotation>
@@ -134,3 +138,45 @@ return img, gt, height, width
 ### DataLoader 작성
 train_dataloader = data.DataLoader(
     train_dataset, batch_size=batch_size, shuffle=True, collate_fn=od_collate_fn)
+
+### SSD Configuration 설정 및 실행
+ssd_cfg = {
+    'num_classes': 21,  # 배경 클래스를 포함한 총 클래스 수
+    'input_size': 300,  # 이미지의 입력 크기
+    'bbox_aspect_num': [4, 6, 6, 6, 4, 4],  # 출력할 DBox의 화면비의 종류
+    'feature_maps': [38, 19, 10, 5, 3, 1],  # 각 source의 이미지 크기
+    'steps': [8, 16, 32, 64, 100, 300],
+    'min_sizes': [30, 60, 111, 162, 213, 264],  # DBOX의 크기(최소)
+    'max_sizes': [60, 111, 162, 213, 264, 315],  # DBOX의 크기(최대)
+    'aspect_ratios': [[2], [2, 3], [2, 3], [2, 3], [2], [2]],
+}
+
+net = SSD(phase='train', cfg=ssd_cfg)
+
+#### DBox(default box) 생성
+aspect_ratios': [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+feature map의 이미지 크기가 각 [38, 19, 10, 5, 3, 1]이라 하자.
+steps는 [8, 16, 32, 64, 100, 300]이라 하자.
+steps는 featrure map 상에서 default box가 위치할 영역의 크기를 결정 => step이 클수록 특징 맵은 더 큰 영역 커버하므로 큰 객체 탐지에 적합
+min_size는 작은 정사각형의 Dbox 픽셀 크기
+max_size는 큰 정사각형의 Dbox 픽셀 크기
+=> 한 픽셀에 작은 Dbox, 큰 Dbox, 작은 Dbox의 종횡비 개수로 구성된다.
+if aspect ratio == [2]: dbox ==4
+else if aspect ratio == [2,3]: dbox ==6
+
+총 dbox 갯수 = (38 * 38**2 * 4) + (19 * 19**2 * 6) + (10 * 10**2 * 6) + (5 * 5**2 * 6) + (3 * 3**2 * 4)
+ + (1 * 1**2 * 4)
+
+#### L2Norm()
+∥x∥2 = root(∑ixi2) => 입력 x를 L2Norm으로 정규화한 뒤 초기 가중치 20인 weight와 곱한다. 
+학습 과정에서 이 값들은 조정된다.
+x의 값이 클루록 L2norm에 의해 더 많이 줄어들게 된다. 이는 신경망이 각 채널의 특징을 보다 균일하게 다루도록 도와준다.
+(특히 object detection에서는 객체와 배경의 pixel값이 많이 다를거기에 이를 정규화 해주는 거다?)
+​
+ 
+​
+### MultiBoxLoss 손실함수
+
+
+### SGD
+
