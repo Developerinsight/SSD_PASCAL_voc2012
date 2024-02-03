@@ -82,7 +82,7 @@ xml = ET.parse(xml_path).getroot()
 
 ######  <annotation>
 
-'''for obj in xml.iter('object'):    
+```for obj in xml.iter('object'):    
     # 한 물체의 annotation을 저장하는 리스트
     bndbox = []
     
@@ -116,7 +116,7 @@ xml = ET.parse(xml_path).getroot()
 
 #[[xmin, ymin, xmax, ymaxm label_ind], ... ]
 return np.array(ret) 
-'''
+```
 #### 2-3. VOCDataset
 img = cv2.imread(image_file_path)
 height, width, channels = img.shape
