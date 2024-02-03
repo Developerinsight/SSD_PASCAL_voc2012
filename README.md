@@ -141,6 +141,7 @@ return img, gt, height, width
 train_dataloader = data.DataLoader(
     train_dataset, batch_size=batch_size, shuffle=True, collate_fn=od_collate_fn)
 
+## SSD 실행행
 ### 4. SSD Configuration 설정 및 실행
 ssd_cfg = {
     'num_classes': 21,  # 배경 클래스를 포함한 총 클래스 수
@@ -269,9 +270,7 @@ def step(self, closure=None):
                 else:
                     d_p = buf
             # θ_t+1 = θ_t −ηv_t+1
-            p.data.add_(d_p, alpha=-lr)  # 파라미터 업데이트
-    return loss
-
+            p.data.add_(d_p, alpha=-lr) 론
 ### 6. Detect(추론 시)
 
 #### 6-1. Decode --- Deafult box -> Bounding Box 생성        
