@@ -40,7 +40,7 @@ train_dataset = VOCDataset(train_img_list, train_anno_list, phase="train", trans
 ##### 2-2-1. XML 포맷의 annotation을 List로 변환
 Anno_xml2list
 ######
-  <annotation>
+######  <annotation>
      <folder>VOC2012</folder>
      <filename>image_1.jpg</filename>
      <size>
