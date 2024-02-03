@@ -1,5 +1,6 @@
 # Single-Shot Detection
-
+* 함수 직관적 이해 돕기 위한 자료입니다.
+  
 ## Dataset과 Dataloader 작성
 
 ### 1. 학습 및 검증용 이미지 데이터, 어노테이션 데이터 파일 경로 리스트 작성
@@ -271,8 +272,35 @@ def step(self, closure=None):
             p.data.add_(d_p, alpha=-lr)  # 파라미터 업데이트
     return loss
 
+### 6. Detect(추론 시)
+
+#### 6-1. Decode --- Deafult box -> Bounding Box 생성        
+for i in range(num_batch):
+        # loc와 DBox로 수정한 BBox [xmin, ymin, xmax, ymax] 를 구한다
+        decoded_boxes = decode(loc_data[i], dbox_list)
+
+loc_data에는 모델이 예측한 각 DBox의 Coordinate 담고 있음
+dbox_list에는 원래 Default box의 Coordinate 담고 있음 
+
+DBox = [cx, cy, width, height], prediced DBox = [Δcx, Δcy, Δwidth, Δheight]
+c′x = cx + Δcx⋅w⋅scale_factor_1
+c′y = cy + Δcx⋅h⋅scale_factor_1
+w′ = w⋅exp(Δw)⋅scale_factor_2
+h′ = h⋅exp(Δh)⋅scale_factor_2
+
+​Xmin = c′x - w′/2
+Ymin = c′y - h′/2
+Xmax = c′x + w′/2
+Ymax = c′y - h′/2
+
+decoded_boxes = [[Xmin, Ymin, Xmax, Ymax], ... ]
 
 
+decoded_boxes 중 confidence_threshold 미만인 BBox 제거
+
+NMS(non-maximum suppression): 겹치는 BBox(IOU 계산) 중 confidence_score가 높은 BBox만 선택해 중복 제거
+
+각 클래스 마다 신롸도가 가장 높은 상위 top_k만큼의 BBox만 남김.
 
 
 
