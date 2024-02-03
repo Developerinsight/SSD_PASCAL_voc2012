@@ -123,18 +123,18 @@ return np.array(ret)
 img = cv2.imread(image_file_path)   
 height, width, channels = img.shape
 
-xml형식의 transform된 annotation 정보 list에 저장
+xml형식의 transform된 annotation 정보 list에 저장   
 anno_list = transform_anno(anno_file_path, width, height)
 
-전처리 실시
+전처리 실시   
 img, boxes, labels = transform(img, phase, anno_list[:,:4], anno_list[:,4])
+   
+BGR -> RGB   
+img = torch.from_numpy(img[:,:,(2,1,0)]).permutate(2,0,1)   
 
-BGR -> RGB
-img = torch.from_numpy(img[:,:,(2,1,0)]).permutate(2,0,1)
-
-gt = np.hstack((boxes, np.expand_dims(labels, axis=1)))
+gt = np.hstack((boxes, np.expand_dims(labels, axis=1)))   
 => Example: [[100, 200, 300, 400, 0],
-             [150, 250, 350, 450, 1], ... ]
+             [150, 250, 350, 450, 1], ... ]   
 
 return img, gt, height, width
 
