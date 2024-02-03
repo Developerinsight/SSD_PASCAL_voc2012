@@ -23,10 +23,10 @@ Example:
 ######     ├── train.txt
 ######     └── val.txt
 
-train_img_list = ['.data/VOCdevkit/VOC2012/JPEGImages/aaa.jpg', ... ]
-train_anno_list = ['.data/VOCdevkit/VOC2012/Annotations/bbb.xml', ... ]
-val_img_list = ['.data/VOCdevkit/VOC2012/Annotations/ccc.xml', ... ]
-val_anno_list = ['.data/VOCdevkit/VOC2012/Annotations/ddd.xml', ... ]
+###### train_img_list = ['.data/VOCdevkit/VOC2012/JPEGImages/aaa.jpg', ... ]
+###### train_anno_list = ['.data/VOCdevkit/VOC2012/Annotations/bbb.xml', ... ]
+###### val_img_list = ['.data/VOCdevkit/VOC2012/Annotations/ccc.xml', ... ]
+###### val_anno_list = ['.data/VOCdevkit/VOC2012/Annotations/ddd.xml', ... ]
 
 ### 2. Dataset 작성
 train_dataset = VOCDataset(train_img_list, train_anno_list, phase="train", transform=DataTransform(
@@ -42,15 +42,15 @@ Anno_xml2list
 
 Example:
 
-<annotation>
-    <folder>VOC2012</folder>
-    <filename>image_1.jpg</filename>
-    <size>
-        <width>800</width>
-        <height>600</height>
-        <depth>3</depth>
-    </size>
-    <object>
+###### <annotation>
+######     <folder>VOC2012</folder>
+######     <filename>image_1.jpg</filename>
+######     <size>
+######         <width>800</width>
+######         <height>600</height>
+######         <depth>3</depth>
+######     </size>
+######     <object>
         <name>cat</name>
         <pose>Unspecified</pose>
         <truncated>0</truncated>
