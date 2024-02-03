@@ -333,7 +333,23 @@ NMS(non-maximum suppression): 겹치는 BBox(IOU 계산) 중 confidence_score가
 
 
 
+# Transformed SSD
 
+Input Size: 512x512
+
+
+ssd 기본 11층 중 4,7,8,9,10,11층에서 feature map 추출하는데 5층에서 feature map 추출하고 extras층에서 10층 다음에 3x3(x128), 3x3(x256)층 추가해서 해당 층에서 feature map 추출   
+
+총 12층 feature map 7개 mAP:67.433이나 train val loss gap 점점 커지자 overfitting 줄이기 위해 (overfitting이 중요한 이유는 new data에 대한 적응력이 떨어질 수 있기 때문) extras층에만 batchnorm 추가 
+   
+overfitting은 줄어들었으나 mAP 66.191로 떨어짐(extras 층에서 제대로 학습이 이루어지지 않았기 떄문)   
+정규화가 오히려 일반화 성능 낮추었다.(?)   
+
+모든 층에 batnorm - relu - dropout(0.2) 적용하니 mAP 0.11 (여기서 문제점은 batchnorm 하는 이유가 gaussian activation을 만들기 위함인데(분산을 줄이기 위해) 그래서 gradient flexibility 향상된다   
+다양한 조건과 데이터셋에 더 잘 일반화되고 적응할 수 있도록 만들어준다. 그 이유는 넓은 범위 학습률 효과적 반응) 모든 층에 batchnorm+dropout 적용하니 신경망이 제대로 학습을 하지 못하는 상황 발생   
+
+4,5층에만 batchnorm => mAP:69, 이유는 4,5층 feature map의 분포 변화가 커서 학습과정이 불안정했기 때문   
+mAP: 70.2   
 
 
 
