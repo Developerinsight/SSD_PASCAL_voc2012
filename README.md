@@ -226,8 +226,46 @@ conf_t_label = [0, 1, 2, 0, 0, 1, 2, 0] --- 각 default box에 대응하는 실�
 
 
 
+### SGD(Stochastic Gradient Descent) --- weight update, 손실함수 최소
 
-### SGD
+def step(self, closure=None):
+    """Performs a single optimization step (parameter update)."""
+    loss = None
+    if closure is not None:
+        with torch.enable_grad():
+            loss = closure()
+
+    for group in self.param_groups:  # 모든 파라미터 그룹에 대해 반복
+        weight_decay = group['weight_decay']
+        # 이전 업데이의 일부를 현재 업데이트에 반영
+        momentum = group['momentum']
+        dampening = group['dampening']
+        nesterov = group['nesterov']
+        lr = group['lr']  # 학습률
+
+        for p in group['params']:  # 현재 그룹 내의 모든 파라미터에 대해 반복
+            if p.grad is None:
+                continue
+            d_p = p.grad.data  # 현재 파라미터의 그래디언트
+            if weight_decay != 0:
+                # θ_t+1 = θ_t - η⋅(∇θL(θ_t)+λθ_t) --- λ == weight_decay
+                d_p.add_(p.data, alpha=weight_decay)  # Weight Decay 적용
+                    
+            if momentum != 0:  # 모멘텀 사용 시
+                param_state = self.state[p]
+                if 'momentum_buffer' not in param_state:
+                    buf = param_state['momentum_buffer'] = torch.clone(d_p).detach()
+                else:
+                    buf = param_state['momentum_buffer']
+                    # v_t+1 = μv_t + (1−τ)∇θL(θ_t)
+                    buf.mul_(momentum).add_(d_p, alpha=1 - dampening)  # 모멘텀 업데이트
+                if nesterov:
+                    d_p = d_p.add(buf, alpha=momentum)  # Nesterov 모멘텀 적용
+                else:
+                    d_p = buf
+
+            p.data.add_(d_p, alpha=-lr)  # 파라미터 업데이트
+    return loss
 
 
 
