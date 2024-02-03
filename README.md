@@ -4,7 +4,7 @@
 ## Dataset과 Dataloader 작성
 
 ### 1. 학습 및 검증용 이미지 데이터, 어노테이션 데이터 파일 경로 리스트 작성
-Make_datapath_list
+#### 1-1. Make_datapath_list
 
 Example:
 VOCdevkit/VOC2012/
