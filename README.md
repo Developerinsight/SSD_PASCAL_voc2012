@@ -141,8 +141,8 @@ return img, gt, height, width
 train_dataloader = data.DataLoader(
     train_dataset, batch_size=batch_size, shuffle=True, collate_fn=od_collate_fn)
 
-## SSD 실행행
-### 4. SSD Configuration 설정 및 실행
+## SSD 실행
+### 1. SSD Configuration 설정 및 실행
 ssd_cfg = {
     'num_classes': 21,  # 배경 클래스를 포함한 총 클래스 수
     'input_size': 300,  # 이미지의 입력 크기
@@ -156,7 +156,7 @@ ssd_cfg = {
 
 net = SSD(phase='train', cfg=ssd_cfg)
 
-#### 4-1. DBox(default box) 생성
+#### 1-1. DBox(default box) 생성
 aspect_ratios': [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
 feature map의 이미지 크기가 각 [38, 19, 10, 5, 3, 1]이라 하자.
 steps는 [8, 16, 32, 64, 100, 300]이라 하자.
@@ -170,7 +170,7 @@ else if aspect ratio == [2,3]: dbox ==6
 총 dbox 갯수 = (38 * 38**2 * 4) + (19 * 19**2 * 6) + (10 * 10**2 * 6) + (5 * 5**2 * 6) + (3 * 3**2 * 4)
  + (1 * 1**2 * 4)
 
-#### 4-2. L2Norm()
+#### 1-2. L2Norm()
 ∥x∥2 = root(∑ixi2) => 입력 x를 L2Norm으로 정규화한 뒤 초기 가중치 20인 weight와 곱한다. 
 학습 과정에서 이 값들은 조정된다.
 x의 값이 클루록 L2norm에 의해 더 많이 줄어들게 된다. 이는 신경망이 각 채널의 특징을 보다 균일하게 다루도록 도와준다.
@@ -178,18 +178,18 @@ x의 값이 클루록 L2norm에 의해 더 많이 줄어들게 된다. 이는 �
 ​
  
 ​
-### 5. MultiBoxLoss 손실함수
+### 2. MultiBoxLoss 손실함수
 location_data = torch.Size([num_batch, 8732, 4]) --- 8732는 Default box 갯수, 4는 (xmin, ymin, xmax, ymax)
 confidence_data = torch.Size([num_batch, 8732, 21]) --- 21은 class 갯수
 dbox_list = torch.Size([8732,4)]
 
 target = [[xmin, ymin, xmax, ymax, label_index], ... ] --- 실제 위치 정보
 
-#### 5-1. location loss 계산 --- defaut box 위치와 실제 box 위치 계산
+#### 2-1. location loss 계산 --- defaut box 위치와 실제 box 위치 계산
 match(self.jaccard_thresh, truths, dbox_list.to(self.device), variance, labels, loc_t, conf_t_label, idx)
 를 통해 실제 객체 위치와 default box의 위치 IOU가 0.5이상인 default box의 location을 loc_t에, label을 conf_t_label에 저장한다. 0.5보다 작으면 0으로 두고, 배경으로 저장한다.
 
-##### 5-1-1. Smooth L1 fuction로 손실 계산 --- 단 물체 발견한 DBox의 coordinates만 계산(0인 배경은 계산 x)
+##### 2-1-1. Smooth L1 fuction로 손실 계산 --- 단 물체 발견한 DBox의 coordinates만 계산(0인 배경은 계산 x)
 SmoothL1Loss(x)=
 { 0.5 × x**2 if |x| < 1 }
 { |x| - 0.5 otherwise  }
@@ -200,7 +200,7 @@ L2 Loss: 차이가 너무 크면 기울기 너무 커져 발산하거나 수렴 
 
 따라서, 연속적인 기울기를 생성해 최적화 과정에서 안정성을 보장하기 위해 사용함.
 
-#### 5-2. Confidence loss 계산 ---
+#### 2-2. Confidence loss 계산 ---
 loss_c = F.cross_entropy(batch_conf, conf_t_label.view(-1), reduction='none')
 
 Cross Entropy: H(y,p) = -∑Yklog(Pk) --- 예측 확률 분포와 실제 레이블 간의 차이를 측정하기 위함.
@@ -229,7 +229,7 @@ conf_t_label = [0, 1, 2, 0, 0, 1, 2, 0] --- 각 default box에 대응하는 실�
 
 
 
-### 6. SGD(Stochastic Gradient Descent) --- weight update, 손실함수 최소
+### 3. SGD(Stochastic Gradient Descent) --- weight update, 손실함수 최소
 
 def step(self, closure=None):
     """Performs a single optimization step (parameter update)."""
@@ -271,9 +271,11 @@ def step(self, closure=None):
                     d_p = buf
             # θ_t+1 = θ_t −ηv_t+1
             p.data.add_(d_p, alpha=-lr) 론
-### 6. Detect(추론 시)
 
-#### 6-1. Decode --- Deafult box -> Bounding Box 생성        
+## SSD 추론
+### 1. Detect(추론 시)
+
+#### 1-1. Decode --- Deafult box -> Bounding Box 생성        
 for i in range(num_batch):
         # loc와 DBox로 수정한 BBox [xmin, ymin, xmax, ymax] 를 구한다
         decoded_boxes = decode(loc_data[i], dbox_list)
