@@ -83,38 +83,38 @@ xml = ET.parse(xml_path).getroot()
 ######  <annotation>
 
 for obj in xml.iter('object'):    
-    한 물체의 annotation을 저장하는 리스트
+    # 한 물체의 annotation을 저장하는 리스트
     bndbox = []
     
-    물체 이름
+    # 물체 이름
     name = obj.find('name').text.lower().strip()
     
-    바운딩 박스 정보
+    # 바운딩 박스 정보
     bbox = obj.find('bndbox')
     
-    annotation의 xmin, ymin, xmax, ymax 취득 후 정규화
+    # annotation의 xmin, ymin, xmax, ymax 취득 후 정규화
     pts = ['xmin', 'ymin', 'xmax', 'ymax']
     
     for pt in (pts):
-        voc는 원점이 (1,1)이므로 1을 빼서 (0,0)으로 한다
+        # voc는 원점이 (1,1)이므로 1을 빼서 (0,0)으로 한다
         cur_pixel = int(bbox.find(pt).text) -1
 
-        x 방향의 경우 폭으로 나눈다
+        # x 방향의 경우 폭으로 나눈다
         if pt == 'xmin' or pt == 'xmax':
             cur_pixel /= width
-        y 방향의 경우 높이로 나눈다
+        # y 방향의 경우 높이로 나눈다
         else:
             cur_pixel /= height
 
         bndbox.append(cur_pixel)
 
-    어노테이션의 클래스명 index를 취득하여 추가
+    # 어노테이션의 클래스명 index를 취득하여 추가
     label_idx = self.classes.index(name)
     bndbox.append(label_idx)
 
     ret += [bndbox]
 
-[[xmin, ymin, xmax, ymaxm label_ind], ... ]
+#[[xmin, ymin, xmax, ymaxm label_ind], ... ]
 return np.array(ret) 
 
 #### 2-3. VOCDataset
