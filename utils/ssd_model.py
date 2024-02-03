@@ -615,7 +615,7 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
     return keep, count
 
 
-# SSD 추론시에 conf와 loc의 출력에서 겹침(중복)을 제거한 BBox를 출력한다
+# SSD 추론시에 conf와 loc의 출력에서 겹침(중복)을 제거 후 남은 BBox를 출력한다
 class Detect(Function):
 
     #def __init__(self, conf_thresh=0.01, top_k=200, nms_thresh=0.45):
