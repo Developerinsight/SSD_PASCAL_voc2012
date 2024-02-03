@@ -7,10 +7,10 @@
 #### 1-1. Make_datapath_list
 
 Example:
-VOCdevkit/VOC2012/
-│
-├── Annotations/              # 어노테이션 XML 파일들이 저장된 폴더
-│   ├── aaa.xml
+###### VOCdevkit/VOC2012/
+###### │
+###### ├── Annotations/              # 어노테이션 XML 파일들이 저장된 폴더
+###### │   ├── aaa.xml
 │   ├── bbb.xml
 │   └── ...
 │
