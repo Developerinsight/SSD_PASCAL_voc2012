@@ -11,17 +11,17 @@ Example:
 ###### │
 ###### ├── Annotations/              # 어노테이션 XML 파일들이 저장된 폴더
 ###### │   ├── aaa.xml
-│   ├── bbb.xml
-│   └── ...
-│
-├── JPEGImages/               # 이미지 JPG 파일들이 저장된 폴더
-│   ├── aaa.jpg
-│   ├── bbb.jpg
-│   └── ...
-│
-└── ImageSets/Main/           # 데이터 세트 구분을 위한 텍스트 파일들이 있는 폴더
-    ├── train.txt
-    └── val.txt
+###### │   ├── bbb.xml
+###### │   └── ...
+###### │
+###### ├── JPEGImages/               # 이미지 JPG 파일들이 저장된 폴더
+###### │   ├── aaa.jpg
+###### │   ├── bbb.jpg
+###### │   └── ...
+###### │
+###### └── ImageSets/Main/           # 데이터 세트 구분을 위한 텍스트 파일들이 있는 폴더
+######     ├── train.txt
+######     └── val.txt
 
 train_img_list = ['.data/VOCdevkit/VOC2012/JPEGImages/aaa.jpg', ... ]
 train_anno_list = ['.data/VOCdevkit/VOC2012/Annotations/bbb.xml', ... ]
