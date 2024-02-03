@@ -82,7 +82,8 @@ xml = ET.parse(xml_path).getroot()
 
 ######  <annotation>
 
-```for obj in xml.iter('object'):    
+```
+for obj in xml.iter('object'):    
     # 한 물체의 annotation을 저장하는 리스트
     bndbox = []
     
