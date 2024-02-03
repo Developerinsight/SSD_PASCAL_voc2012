@@ -2,7 +2,7 @@
 
 ## Dataset과 Dataloader 작성
 
-### 학습 및 검증용 이미지 데이터, 어노테이션 데이터 파일 경로 리스트 작성
+### 1. 학습 및 검증용 이미지 데이터, 어노테이션 데이터 파일 경로 리스트 작성
 Make_datapath_list
 
 Example:
@@ -27,15 +27,16 @@ train_anno_list = ['.data/VOCdevkit/VOC2012/Annotations/bbb.xml', ... ]
 val_img_list = ['.data/VOCdevkit/VOC2012/Annotations/ccc.xml', ... ]
 val_anno_list = ['.data/VOCdevkit/VOC2012/Annotations/ddd.xml', ... ]
 
-### Dataset 작성
+### 2. Dataset 작성
 train_dataset = VOCDataset(train_img_list, train_anno_list, phase="train", transform=DataTransform(
     input_size, color_mean), transform_anno=Anno_xml2list(voc_classes))
 
 
-#### transform은 이미지 자체에 적용되는 전처리 과정 => [[150,150,210,210,라벨], ... ]
+#### 2-1. transform은 이미지 자체에 적용되는 전처리 과정 => [[150,150,210,210,라벨], ... ]
 
-#### transform_anno는 객체 위치와 라벨 정보에 대한 전처리 과정 => [[xmin,ymin,xmax,ymax,label_index], ... ]
-##### XML 포맷의 annotation을 List로 변환
+#### 2-2. transform_anno는 객체 위치와 라벨 정보에 대한 전처리 과정 => [[xmin,ymin,xmax,ymax,label_index], ... ]
+
+##### 2-2-1. XML 포맷의 annotation을 List로 변환
 Anno_xml2list
 
 Example:
@@ -116,7 +117,7 @@ for obj in xml.iter('object'):
 [[xmin, ymin, xmax, ymaxm label_ind], ... ]
 return np.array(ret) 
 
-#### VOCDataset
+#### 2-3. VOCDataset
 img = cv2.imread(image_file_path)
 height, width, channels = img.shape
 
@@ -135,11 +136,11 @@ gt = np.hstack((boxes, np.expand_dims(labels, axis=1)))
 
 return img, gt, height, width
 
-### DataLoader 작성
+### 3. DataLoader 작성
 train_dataloader = data.DataLoader(
     train_dataset, batch_size=batch_size, shuffle=True, collate_fn=od_collate_fn)
 
-### SSD Configuration 설정 및 실행
+### 4. SSD Configuration 설정 및 실행
 ssd_cfg = {
     'num_classes': 21,  # 배경 클래스를 포함한 총 클래스 수
     'input_size': 300,  # 이미지의 입력 크기
@@ -153,7 +154,7 @@ ssd_cfg = {
 
 net = SSD(phase='train', cfg=ssd_cfg)
 
-#### DBox(default box) 생성
+#### 4-1. DBox(default box) 생성
 aspect_ratios': [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
 feature map의 이미지 크기가 각 [38, 19, 10, 5, 3, 1]이라 하자.
 steps는 [8, 16, 32, 64, 100, 300]이라 하자.
@@ -167,7 +168,7 @@ else if aspect ratio == [2,3]: dbox ==6
 총 dbox 갯수 = (38 * 38**2 * 4) + (19 * 19**2 * 6) + (10 * 10**2 * 6) + (5 * 5**2 * 6) + (3 * 3**2 * 4)
  + (1 * 1**2 * 4)
 
-#### L2Norm()
+#### 4-2. L2Norm()
 ∥x∥2 = root(∑ixi2) => 입력 x를 L2Norm으로 정규화한 뒤 초기 가중치 20인 weight와 곱한다. 
 학습 과정에서 이 값들은 조정된다.
 x의 값이 클루록 L2norm에 의해 더 많이 줄어들게 된다. 이는 신경망이 각 채널의 특징을 보다 균일하게 다루도록 도와준다.
@@ -175,18 +176,18 @@ x의 값이 클루록 L2norm에 의해 더 많이 줄어들게 된다. 이는 �
 ​
  
 ​
-### MultiBoxLoss 손실함수
+### 5. MultiBoxLoss 손실함수
 location_data = torch.Size([num_batch, 8732, 4]) --- 8732는 Default box 갯수, 4는 (xmin, ymin, xmax, ymax)
 confidence_data = torch.Size([num_batch, 8732, 21]) --- 21은 class 갯수
 dbox_list = torch.Size([8732,4)]
 
 target = [[xmin, ymin, xmax, ymax, label_index], ... ] --- 실제 위치 정보
 
-#### location loss 계산 --- defaut box 위치와 실제 box 위치 계산
+#### 5-1. location loss 계산 --- defaut box 위치와 실제 box 위치 계산
 match(self.jaccard_thresh, truths, dbox_list.to(self.device), variance, labels, loc_t, conf_t_label, idx)
 를 통해 실제 객체 위치와 default box의 위치 IOU가 0.5이상인 default box의 location을 loc_t에, label을 conf_t_label에 저장한다. 0.5보다 작으면 0으로 두고, 배경으로 저장한다.
 
-##### Smooth L1 fuction로 손실 계산 --- 단 물체 발견한 DBox의 coordinates만 계산(0인 배경은 계산 x)
+##### 5-1-1. Smooth L1 fuction로 손실 계산 --- 단 물체 발견한 DBox의 coordinates만 계산(0인 배경은 계산 x)
 SmoothL1Loss(x)=
 { 0.5 × x**2 if |x| < 1 }
 { |x| - 0.5 otherwise  }
@@ -197,7 +198,7 @@ L2 Loss: 차이가 너무 크면 기울기 너무 커져 발산하거나 수렴 
 
 따라서, 연속적인 기울기를 생성해 최적화 과정에서 안정성을 보장하기 위해 사용함.
 
-#### Confidence loss 계산 ---
+#### 5-2. Confidence loss 계산 ---
 loss_c = F.cross_entropy(batch_conf, conf_t_label.view(-1), reduction='none')
 
 Cross Entropy: H(y,p) = -∑Yklog(Pk) --- 예측 확률 분포와 실제 레이블 간의 차이를 측정하기 위함.
@@ -226,7 +227,7 @@ conf_t_label = [0, 1, 2, 0, 0, 1, 2, 0] --- 각 default box에 대응하는 실�
 
 
 
-### SGD(Stochastic Gradient Descent) --- weight update, 손실함수 최소
+### 6. SGD(Stochastic Gradient Descent) --- weight update, 손실함수 최소
 
 def step(self, closure=None):
     """Performs a single optimization step (parameter update)."""
@@ -249,6 +250,8 @@ def step(self, closure=None):
             d_p = p.grad.data  # 현재 파라미터의 그래디언트
             if weight_decay != 0:
                 # θ_t+1 = θ_t - η⋅(∇θL(θ_t)+λθ_t) --- λ == weight_decay
+                # ∇θL(θ_t): 손실함수 L에 대한 파라미터 θ_t의 그래디언트(미분값, 기울기)
+                # 가중치의 미분을 빼주어 손실함수의 '골짜기'를 내려가 최솟값을 찾기 위함
                 d_p.add_(p.data, alpha=weight_decay)  # Weight Decay 적용
                     
             if momentum != 0:  # 모멘텀 사용 시
@@ -258,12 +261,13 @@ def step(self, closure=None):
                 else:
                     buf = param_state['momentum_buffer']
                     # v_t+1 = μv_t + (1−τ)∇θL(θ_t)
+                    # μ: momentum, 이전 v_t의 비율 결정, τ: dampening, 모멘텀에 그레디언트가 더해지는 비율을 감소
                     buf.mul_(momentum).add_(d_p, alpha=1 - dampening)  # 모멘텀 업데이트
                 if nesterov:
                     d_p = d_p.add(buf, alpha=momentum)  # Nesterov 모멘텀 적용
                 else:
                     d_p = buf
-
+            # θ_t+1 = θ_t −ηv_t+1
             p.data.add_(d_p, alpha=-lr)  # 파라미터 업데이트
     return loss
 
