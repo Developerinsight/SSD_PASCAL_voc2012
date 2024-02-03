@@ -120,7 +120,7 @@ for obj in xml.iter('object'):
 return np.array(ret) 
 ```
 #### 2-3. VOCDataset
-img = cv2.imread(image_file_path)
+img = cv2.imread(image_file_path)   
 height, width, channels = img.shape
 
 xml형식의 transform된 annotation 정보 list에 저장
